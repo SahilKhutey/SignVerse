@@ -101,13 +101,24 @@ async def live_video_socket(websocket: WebSocket):
             break
 
         try:
-            ret, frame = await loop.run_in_executor(None, broadcaster.cap.read)
-            if not ret:
+            # Query the shared latest frame instead of doing concurrent cv2 read operations
+            frame = broadcaster.get_latest_frame()
+            if frame is None:
                 await asyncio.sleep(0.01)
                 continue
 
-            # Resize for bandwidth
-            frame_small = cv2.resize(frame, (640, 480))
+            # Letterbox resize BGR frame to 640x480 (preserves aspect ratio with black padding)
+            # This matches the perception coordinate system perfectly to align bounding boxes
+            h, w = frame.shape[:2]
+            scale = min(640 / w, 480 / h)
+            new_w = int(w * scale)
+            new_h = int(h * scale)
+            resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+            frame_small = np.zeros((480, 640, 3), dtype=np.uint8)
+            y_offset = (480 - new_h) // 2
+            x_offset = (640 - new_w) // 2
+            frame_small[y_offset:y_offset + new_h, x_offset:x_offset + new_w] = resized
 
             # Encode as JPEG
             _, buf = cv2.imencode('.jpg', frame_small, [cv2.IMWRITE_JPEG_QUALITY, 75])

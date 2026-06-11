@@ -123,7 +123,8 @@ class ObjectDetector3D:
             return
         self.model = YOLO(model_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"[ObjectDetector3D] device={self.device}")
+        self.imgsz = 320 if self.device == "cpu" else 640
+        print(f"[ObjectDetector3D] device={self.device} imgsz={self.imgsz}")
 
         # Per-track state
         self._history:    Dict[int, List[List[float]]] = defaultdict(list)
@@ -162,10 +163,11 @@ class ObjectDetector3D:
                 frame, persist=persist,
                 tracker="bytetrack.yaml",
                 verbose=False, device=self.device,
+                imgsz=self.imgsz
             )
         except Exception:
             try:
-                results = self.model.predict(frame, verbose=False, device=self.device)
+                results = self.model.predict(frame, verbose=False, device=self.device, imgsz=self.imgsz)
             except Exception:
                 return []
 

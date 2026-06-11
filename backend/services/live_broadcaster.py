@@ -56,12 +56,22 @@ class LiveBroadcaster:
         """Register a callback for every processed frame (for stats/log)."""
         self.frame_callbacks.append(callback)
 
+    def get_latest_frame(self) -> Optional[np.ndarray]:
+        """Get the latest frame read by the camera reader thread."""
+        if not hasattr(self, 'latest_frame_lock'):
+            return None
+        with self.latest_frame_lock:
+            if self.latest_frame is not None:
+                return self.latest_frame.copy()
+        return None
+
     async def start_streaming(self, camera_id: int = 0):
         """Start the live capture + perception loop."""
         if self.is_streaming:
             return
 
         import cv2
+        import threading
         self.cap = cv2.VideoCapture(camera_id)
         if not self.cap.isOpened():
             raise RuntimeError(f"Cannot open camera {camera_id}")
@@ -71,7 +81,28 @@ class LiveBroadcaster:
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.cap.set(cv2.CAP_PROP_FPS, 30)
 
+        self.latest_frame = None
+        self.latest_frame_id = 0
+        self.latest_frame_lock = threading.Lock()
         self.is_streaming = True
+
+        def _reader_loop():
+            while self.is_streaming:
+                try:
+                    ret, frame = self.cap.read()
+                    if not ret:
+                        time.sleep(0.002)
+                        continue
+                    with self.latest_frame_lock:
+                        self.latest_frame = frame
+                        self.latest_frame_id += 1
+                except Exception:
+                    time.sleep(0.01)
+                time.sleep(0.002)
+
+        self.reader_thread = threading.Thread(target=_reader_loop, daemon=True)
+        self.reader_thread.start()
+
         self.stream_task = asyncio.create_task(self._stream_loop())
 
     async def stop_streaming(self):
@@ -83,6 +114,11 @@ class LiveBroadcaster:
                 await self.stream_task
             except asyncio.CancelledError:
                 pass
+        if hasattr(self, 'reader_thread'):
+            try:
+                self.reader_thread.join(timeout=1.0)
+            except Exception:
+                pass
         if hasattr(self, 'cap'):
             self.cap.release()
 
@@ -93,16 +129,23 @@ class LiveBroadcaster:
         """
         frame_id = 0
         loop = asyncio.get_event_loop()
+        last_processed_id = -1
 
         while self.is_streaming:
             loop_start = time.time()
 
-            # Read frame in executor (OpenCV is blocking)
-            ret, frame = await loop.run_in_executor(None, self.cap.read)
-            if not ret:
-                await asyncio.sleep(0.01)
+            frame = None
+            frame_id_internal = -1
+            with self.latest_frame_lock:
+                if self.latest_frame is not None and self.latest_frame_id > last_processed_id:
+                    frame = self.latest_frame.copy()
+                    frame_id_internal = self.latest_frame_id
+
+            if frame is None:
+                await asyncio.sleep(0.005)
                 continue
 
+            last_processed_id = frame_id_internal
             timestamp_ms = int(time.time() * 1000)
 
             # Run perception in executor (CPU-heavy)
