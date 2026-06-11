@@ -1,0 +1,39 @@
+/* Polish styles for Day 3 */
+
+/* Customize scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Hover effects for lists */
+.segment-row:hover {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+/* Spark animations for metrics */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px var(--accent); }
+  50% { box-shadow: 0 0 15px var(--accent); }
+  100% { box-shadow: 0 0 5px var(--accent); }
+}
+
+.glow-box {
+  animation: glow 2s infinite;
+}
+
+/* Center layout alignments */
+.app {
+  max-width: 1600px; /* Wider for 4 columns */
+}

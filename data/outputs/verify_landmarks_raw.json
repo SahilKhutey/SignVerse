@@ -1,0 +1,280 @@
+{
+  "summary": {
+    "duration_sec": 0.9666666666666667,
+    "total_displacement": 0.0,
+    "motion_intensity": "low"
+  },
+  "frame_count": 30,
+  "landmarks": [
+    {
+      "frame_id": 0,
+      "timestamp": 0.0,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 1,
+      "timestamp": 0.03333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 2,
+      "timestamp": 0.06666666666666667,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 3,
+      "timestamp": 0.1,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 4,
+      "timestamp": 0.13333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 5,
+      "timestamp": 0.16666666666666666,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 6,
+      "timestamp": 0.2,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 7,
+      "timestamp": 0.23333333333333334,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 8,
+      "timestamp": 0.26666666666666666,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 9,
+      "timestamp": 0.3,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 10,
+      "timestamp": 0.3333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 11,
+      "timestamp": 0.36666666666666664,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 12,
+      "timestamp": 0.4,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 13,
+      "timestamp": 0.43333333333333335,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 14,
+      "timestamp": 0.4666666666666667,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 15,
+      "timestamp": 0.5,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 16,
+      "timestamp": 0.5333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 17,
+      "timestamp": 0.5666666666666667,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 18,
+      "timestamp": 0.6,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 19,
+      "timestamp": 0.6333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 20,
+      "timestamp": 0.6666666666666666,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 21,
+      "timestamp": 0.7,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 22,
+      "timestamp": 0.7333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 23,
+      "timestamp": 0.7666666666666667,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 24,
+      "timestamp": 0.8,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 25,
+      "timestamp": 0.8333333333333334,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 26,
+      "timestamp": 0.8666666666666667,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 27,
+      "timestamp": 0.9,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 28,
+      "timestamp": 0.9333333333333333,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    },
+    {
+      "frame_id": 29,
+      "timestamp": 0.9666666666666667,
+      "landmarks_33": [],
+      "left_hand_21": [],
+      "right_hand_21": [],
+      "face_mesh": [],
+      "joint_angles": {}
+    }
+  ]
+}

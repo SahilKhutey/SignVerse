@@ -1,0 +1,4 @@
+-r requirements.txt
+py-spy>=0.3.14
+memory-profiler>=0.61.0
+pyinstrument>=4.6.0
