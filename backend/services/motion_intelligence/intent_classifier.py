@@ -95,7 +95,7 @@ class IntentClassifier:
         if posture == "standing" and not objects_held:
             if "WALK" in prims:
                 return Intent.WALK.value
-            return Intent.STAND
+            return Intent.STAND.value
 
         # 5. General primitive fallbacks
         if "GRASP" in prims:
