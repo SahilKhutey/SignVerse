@@ -30,14 +30,12 @@ export default function LiveVideoFeed() {
       }
     }
     
-    // Override onMessage to handle binary
-    if (videoWs.ws) {
-      videoWs.ws.addEventListener('message', handler)
-    }
+    const unsubscribe = videoWs.onMessage((event) => {
+      handler(event)
+    })
+    
     return () => {
-      if (videoWs.ws) {
-        videoWs.ws.removeEventListener('message', handler)
-      }
+      unsubscribe()
     }
   }, [videoWs])
   

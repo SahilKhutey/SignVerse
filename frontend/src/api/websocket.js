@@ -6,7 +6,24 @@ import { WS_URL } from './client'
 export class WebSocketManager {
   constructor(path, options = {}) {
     this.path = path
-    this.url = `${WS_URL}${path}`
+    
+    // Resolve full WebSocket URL dynamically to support relative paths/proxies
+    let baseUrl = WS_URL
+    if (baseUrl.startsWith('/')) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      baseUrl = `${protocol}//${window.location.host}${baseUrl}`
+    } else if (!baseUrl.startsWith('ws://') && !baseUrl.startsWith('wss://')) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      if (baseUrl.startsWith('http://')) {
+        baseUrl = baseUrl.replace('http://', 'ws://')
+      } else if (baseUrl.startsWith('https://')) {
+        baseUrl = baseUrl.replace('https://', 'wss://')
+      } else {
+        baseUrl = `${protocol}//${window.location.host}${baseUrl.startsWith('.') ? baseUrl.slice(1) : baseUrl}`
+      }
+    }
+    
+    this.url = `${baseUrl}${path}`
     this.ws = null
     this.handlers = new Set()
     this.statusHandlers = new Set()

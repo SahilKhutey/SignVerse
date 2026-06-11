@@ -144,12 +144,21 @@ function drawHUD(ctx, frame, w, h) {
   ctx.fillStyle = '#00d9ff'
   ctx.font = 'bold 11px monospace'
   ctx.textAlign = 'left'
-  ctx.fillText(`Frame ${frame.frame_id} | ${frame.timestamp_ms}ms`, 10, 20)
-  ctx.fillText(`Conf: ${(frame.pose_confidence * 100).toFixed(0)}% | ${frame.processing_time_ms}ms`, 10, 40)
+  
+  const frameId = frame.frame_id !== undefined && frame.frame_id !== null ? frame.frame_id : 0
+  const timestamp = frame.timestamp_ms !== undefined && frame.timestamp_ms !== null ? frame.timestamp_ms : 0
+  const poseConf = frame.pose_confidence !== undefined && frame.pose_confidence !== null ? (frame.pose_confidence * 100).toFixed(0) : '0'
+  const procTime = frame.processing_time_ms !== undefined && frame.processing_time_ms !== null ? frame.processing_time_ms.toFixed(0) : '0'
+  const intent = frame.primary_intent || 'IDLE'
+  const intentConf = frame.intent_confidence !== undefined && frame.intent_confidence !== null ? (frame.intent_confidence * 100).toFixed(0) : '0'
+  const action = frame.primary_action || 'IDLE'
+  
+  ctx.fillText(`Frame ${frameId} | ${timestamp}ms`, 10, 20)
+  ctx.fillText(`Conf: ${poseConf}% | ${procTime}ms`, 10, 40)
   
   ctx.textAlign = 'right'
   ctx.fillStyle = '#7c3aed'
-  ctx.fillText(`Intent: ${frame.primary_intent} (${(frame.intent_confidence * 100).toFixed(0)}%)`, w - 10, 20)
+  ctx.fillText(`Intent: ${intent} (${intentConf}%)`, w - 10, 20)
   ctx.fillStyle = '#10b981'
-  ctx.fillText(`Action: ${frame.primary_action}`, w - 10, 40)
+  ctx.fillText(`Action: ${action}`, w - 10, 40)
 }

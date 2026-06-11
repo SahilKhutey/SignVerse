@@ -8,7 +8,7 @@ import LiveInteractionLog from '../components/live/LiveInteractionLog'
 import { LoadingSpinner } from '../components/shared/LoadingSpinner'
 
 export default function LivePage() {
-  const { connect, disconnect, status, latestFrame, serverFps, subscriberCount, liveStats } = useLiveStore()
+  const { connect, disconnect, status, latestFrame, serverFps, subscriberCount, liveStats, errorMsg } = useLiveStore()
   const [showVideo, setShowVideo] = useState(true)
   const [show3D, setShow3D] = useState(true)
   const [showFace, setShowFace] = useState(true)
@@ -71,8 +71,17 @@ export default function LivePage() {
               <div style={{ 
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: '100%', height: '100%', color: '#9ca3c4',
+                padding: 16, textAlign: 'center',
               }}>
-                {status === 'connecting' ? <LoadingSpinner message="Connecting..." /> : 'Disconnected'}
+                {status === 'connecting' ? (
+                  <LoadingSpinner message="Connecting..." />
+                ) : status === 'error' || errorMsg ? (
+                  <div style={{ color: '#ef4444', fontWeight: 500 }}>
+                    ⚠️ {errorMsg || 'Connection failed. Verify the backend is running.'}
+                  </div>
+                ) : (
+                  'Disconnected'
+                )}
               </div>
             )}
           </div>

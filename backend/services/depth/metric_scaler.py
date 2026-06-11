@@ -410,6 +410,9 @@ class MetricScaleRecovery:
         -------
         list of ScaleAnchor
         """
+        if landmarks is None or len(landmarks) < 33:
+            return []
+            
         anchors: List[ScaleAnchor] = []
         lm = landmarks  # shorthand
 

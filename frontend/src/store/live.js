@@ -4,6 +4,7 @@ import { WebSocketManager } from '../api/websocket'
 export const useLiveStore = create((set, get) => ({
   latestFrame: null,
   status: 'disconnected',
+  errorMsg: null,
   serverFps: 0,
   subscriberCount: 0,
   wsManager: null,
@@ -17,6 +18,7 @@ export const useLiveStore = create((set, get) => ({
   connect() {
     if (get().wsManager) return
     
+    set({ errorMsg: null })
     const ws = new WebSocketManager('/ws/live')
     ws.onMessage((data) => {
       if (data.type === 'frame') {
@@ -30,9 +32,16 @@ export const useLiveStore = create((set, get) => ({
             startedAt: state.liveStats.startedAt || Date.now(),
           },
         }))
+      } else if (data.type === 'error') {
+        set({ errorMsg: data.message })
       }
     })
-    ws.onStatusChange((status) => set({ status }))
+    ws.onStatusChange((status) => {
+      set({ status })
+      if (status === 'error') {
+        set({ errorMsg: 'WebSocket connection failed. Verify the backend service is running.' })
+      }
+    })
     ws.connect()
     
     // Also connect to video feed
@@ -52,6 +61,7 @@ export const useLiveStore = create((set, get) => ({
       wsManager: null,
       videoWs: null,
       status: 'disconnected',
+      errorMsg: null,
       latestFrame: null,
       liveStats: { framesProcessed: 0, avgLatency: 0, startedAt: null },
     })
