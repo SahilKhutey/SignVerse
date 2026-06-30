@@ -38,8 +38,8 @@ class Database:
             conn.execute(
                 """INSERT INTO motion_sessions 
                    (id, source_type, name, fps, frame_count, duration_s, 
-                    video_path, created_at, status, action_label, avg_confidence)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    video_path, created_at, status, action_label, avg_confidence, has_metric_data)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     session_id,
                     source,
@@ -51,7 +51,8 @@ class Database:
                     datetime.utcnow().isoformat(),
                     "ready",
                     "unlabeled",
-                    0.0
+                    0.0,
+                    0
                 ),
             )
         return session_id

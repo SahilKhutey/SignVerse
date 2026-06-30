@@ -1,6 +1,6 @@
 import numpy as np
 import plotly.graph_objects as go
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 class Skeleton3DRenderer:
     """Renders real-time 3D skeleton models using Plotly Scatter3d graphics"""

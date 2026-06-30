@@ -127,6 +127,47 @@ def seed_demo_data():
             
         db.update_skeleton_path(s["session_id"], str(skeleton_path))
         
+        # Populate motion_frames table for exporters compatibility
+        with db._conn() as conn:
+            for f_idx, frame in enumerate(frames):
+                p_json = {
+                    "pose": frame["pose_33"],
+                    "left_hand": frame["left_hand_21"],
+                    "right_hand": frame["right_hand_21"],
+                    "face": []
+                }
+                k_json = {
+                    "frame_idx": f_idx,
+                    "timestamp_ms": (f_idx / s["fps"]) * 1000.0,
+                    "euler_deg": {
+                        "left_shoulder": [0.0, 0.0, 0.0],
+                        "right_shoulder": [0.0, 0.0, 0.0],
+                        "left_elbow": [180.0, 0.0, 0.0],
+                        "right_elbow": [180.0, 0.0, 0.0],
+                        "left_hip": [180.0, 0.0, 0.0],
+                        "right_hip": [180.0, 0.0, 0.0],
+                        "left_knee": [180.0, 0.0, 0.0],
+                        "right_knee": [180.0, 0.0, 0.0]
+                    },
+                    "euler_rad": {},
+                    "quaternions": {},
+                    "velocities": {}
+                }
+                conn.execute(
+                    """INSERT INTO motion_frames 
+                       (id, session_id, frame_idx, timestamp_ms, perception_json, kinematics_json, confidence_mean)
+                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        f"{s['session_id']}_frame_{f_idx}",
+                        s["session_id"],
+                        f_idx,
+                        (f_idx / s["fps"]) * 1000.0,
+                        json.dumps(p_json),
+                        json.dumps(k_json),
+                        0.95
+                    )
+                )
+
         # Generate and save segments
         segmenter = ActionSegmenter(fps=s["fps"])
         segments = segmenter.segment_sequence([frame["pose_33"] for frame in frames])

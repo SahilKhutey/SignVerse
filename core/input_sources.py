@@ -4,6 +4,7 @@ import os
 import time
 from pathlib import Path
 import yt_dlp
+from typing import Optional, List
 
 class InputManager:
     """Manages all media ingestion sources: file uploads, YouTube, and local camera feeds"""

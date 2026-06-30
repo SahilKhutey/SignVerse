@@ -15,7 +15,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-  config.headers['X-Request-ID'] = crypto.randomUUID()
+  const requestId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+    ? crypto.randomUUID() 
+    : Math.random().toString(36).substring(2, 15);
+  config.headers['X-Request-ID'] = requestId
   console.log(`[API] ${config.method.toUpperCase()} ${config.url}`)
   return config
 })

@@ -8,6 +8,7 @@ const NAV = [
   { path: '/viewer', label: '3D Viewer', icon: '🌐' },
   { path: '/export', label: 'Export', icon: '📦' },
   { path: '/system', label: 'System', icon: '⚙️' },
+  { path: '/settings', label: 'Settings', icon: '🛠️' },
 ]
 
 export default function Sidebar() {

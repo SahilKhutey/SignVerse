@@ -45,7 +45,11 @@ class PoseExtractor:
     
     def __init__(self, 
                  model_complexity: int = 1,
-                 smooth_landmarks: bool = True):
+                 smooth_landmarks: bool = True,
+                 enable_hands: bool = True,
+                 enable_face: bool = True):
+        self.enable_hands = enable_hands
+        self.enable_face = enable_face
         self.mp_pose = mp.solutions.pose
         self.mp_hands = mp.solutions.hands
         self.mp_face = mp.solutions.face_mesh
@@ -82,12 +86,18 @@ class PoseExtractor:
         pose_lms = self._format_pose_landmarks(pose_results.pose_landmarks)
         
         # 2. Hand Landmarks
-        hand_results = self.hands.process(rgb)
-        left_hand, right_hand = self._process_hands(hand_results)
+        if self.enable_hands:
+            hand_results = self.hands.process(rgb)
+            left_hand, right_hand = self._process_hands(hand_results)
+        else:
+            left_hand, right_hand = [], []
         
         # 3. Face Mesh Landmarks
-        face_results = self.face.process(rgb)
-        face_lms = self._format_face_mesh(face_results)
+        if self.enable_face:
+            face_results = self.face.process(rgb)
+            face_lms = self._format_face_mesh(face_results)
+        else:
+            face_lms = []
         
         return PoseFrame(
             frame_id=frame_id,

@@ -96,8 +96,8 @@ class JointCalculator:
 class MotionCapture:
     """Coordinates the entire computer vision and kinematics tracking pipeline"""
     
-    def __init__(self, alpha: float = 0.5):
-        self.extractor = PoseExtractor()
+    def __init__(self, alpha: float = 0.5, enable_hands: bool = True, enable_face: bool = True):
+        self.extractor = PoseExtractor(enable_hands=enable_hands, enable_face=enable_face)
         self.smoother = MotionSmoother(alpha=alpha)
         self.joint_calc = JointCalculator()
         

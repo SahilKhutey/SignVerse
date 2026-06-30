@@ -18,7 +18,9 @@ export const useUiStore = create((set) => ({
   },
 
   addToast(message, type = 'success') {
-    const id = crypto.randomUUID()
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substring(2, 15);
     set((state) => ({
       toasts: [...state.toasts, { id, message, type }]
     }))
