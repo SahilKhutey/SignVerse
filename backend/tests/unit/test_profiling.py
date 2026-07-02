@@ -87,3 +87,24 @@ class TestProfilingEndpoints:
         assert "objects_collected" in data
         assert "freed_mb" in data
         assert data["objects_collected"] >= 0
+
+    def test_telemetry_metrics_endpoint(self):
+        """GET /api/profiling/metrics should return API and WebSocket metrics."""
+        client = TestClient(app)
+        
+        # Hit some routes to register telemetry
+        client.get("/api/system/stats")
+        
+        response = client.get("/api/profiling/metrics")
+        assert response.status_code == 200
+        data = response.json()
+        assert "api" in data
+        assert "websockets" in data
+        
+        # Ensure the hit was recorded
+        api_metrics = data["api"]
+        assert len(api_metrics) > 0
+        hits = [m for m in api_metrics if "/api/system/stats" in m["path"]]
+        assert len(hits) > 0
+        assert hits[0]["count"] >= 1
+

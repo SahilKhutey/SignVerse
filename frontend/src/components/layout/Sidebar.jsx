@@ -9,6 +9,7 @@ const NAV = [
   { path: '/export', label: 'Export', icon: '📦' },
   { path: '/system', label: 'System', icon: '⚙️' },
   { path: '/settings', label: 'Settings', icon: '🛠️' },
+  { path: 'http://localhost:8501', label: 'Streamlit Studio', icon: '🎨', external: true }
 ]
 
 export default function Sidebar() {
@@ -37,38 +38,68 @@ export default function Sidebar() {
       
       {/* Nav */}
       <nav style={{ flex: 1 }}>
-        {NAV.map(item => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '10px 12px',
-              borderRadius: 6,
-              color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-              background: isActive ? 'var(--bg-tertiary)' : 'transparent',
-              textDecoration: 'none',
-              marginBottom: 2,
-              fontSize: 13,
-              fontWeight: isActive ? 600 : 400,
-              transition: 'all 0.15s',
-              position: 'relative',
-            })}
-          >
-            <span style={{ fontSize: 16 }}>{item.icon}</span>
-            <span style={{ flex: 1 }}>{item.label}</span>
-            {item.path === '/live' && isLive && (
-              <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: '#10b981',
-                boxShadow: '0 0 8px #10b981',
-                animation: 'pulse 1.5s infinite',
-              }} />
-            )}
-          </NavLink>
-        ))}
+        {NAV.map(item => {
+          if (item.external) {
+            return (
+              <a
+                key={item.path}
+                href={item.path}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 6,
+                  color: 'var(--text-secondary)',
+                  textDecoration: 'none',
+                  marginBottom: 2,
+                  fontSize: 13,
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                <span style={{ fontSize: 16 }}>{item.icon}</span>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                <span style={{ fontSize: 10, opacity: 0.6 }}>↗</span>
+              </a>
+            )
+          }
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                borderRadius: 6,
+                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                background: isActive ? 'var(--bg-tertiary)' : 'transparent',
+                textDecoration: 'none',
+                marginBottom: 2,
+                fontSize: 13,
+                fontWeight: isActive ? 600 : 400,
+                transition: 'all 0.15s',
+                position: 'relative',
+              })}
+            >
+              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {item.path === '/live' && isLive && (
+                <span style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: '#10b981',
+                  boxShadow: '0 0 8px #10b981',
+                  animation: 'pulse 1.5s infinite',
+                }} />
+              )}
+            </NavLink>
+          )
+        })}
       </nav>
       
       {/* Footer */}

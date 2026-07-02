@@ -6,9 +6,11 @@ import json
 import base64
 import cv2
 import numpy as np
+import time
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
 from backend.services.live_broadcaster import broadcaster
+from backend.services.profiling.telemetry_manager import telemetry_manager
 
 router = APIRouter(prefix="/ws/live", tags=["live"])
 
@@ -20,6 +22,7 @@ async def live_perception_socket(websocket: WebSocket):
     - Client can send control messages: {"action": "start"}, {"action": "stop"}
     """
     await websocket.accept()
+    telemetry_manager.record_ws_connect()
 
     # Subscribe to broadcaster
     queue = broadcaster.subscribe()
@@ -32,6 +35,7 @@ async def live_perception_socket(websocket: WebSocket):
     except Exception as e:
         await websocket.send_json({"type": "error", "message": str(e)})
         await websocket.close()
+        telemetry_manager.record_ws_disconnect()
         return
 
     # Send "ready" message
@@ -62,7 +66,9 @@ async def live_perception_socket(websocket: WebSocket):
             # Wait for next perception frame from broadcaster
             try:
                 frame_msg = await asyncio.wait_for(queue.get(), timeout=0.1)
+                start_time = time.perf_counter()
                 await websocket.send_json(frame_msg)
+                telemetry_manager.record_ws_frame(time.perf_counter() - start_time)
             except asyncio.TimeoutError:
                 # Send keepalive ping
                 now = asyncio.get_event_loop().time()
@@ -76,6 +82,7 @@ async def live_perception_socket(websocket: WebSocket):
         print(f"WebSocket error: {e}")
     finally:
         broadcaster.unsubscribe(queue)
+        telemetry_manager.record_ws_disconnect()
 
 
 @router.websocket("/video")

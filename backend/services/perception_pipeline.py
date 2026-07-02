@@ -4,7 +4,7 @@ import cv2
 import uuid
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from backend.services.perception.holistic_extractor import HolisticExtractor, PerceptionResult, Landmark
@@ -121,6 +121,7 @@ class PerceptionPipeline:
         frames = []
         frame_id = 0
         self.smoother.reset()
+        self.intent_classifier.reset()
         self.last_interaction_graph = None
         self.last_primitives_data = None
         
@@ -155,7 +156,7 @@ class PerceptionPipeline:
             fps=fps,
             frame_count=len(frames),
             duration_sec=len(frames) / fps,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             status="ready"
         )
         

@@ -10,7 +10,7 @@ New HOI tables are populated additionally.
 import json
 import numpy as np
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from collections import Counter
 from sqlalchemy.orm import Session
@@ -69,7 +69,7 @@ class DatasetBuilderHOI(DatasetBuilder):
         Returns session_id.
         """
         session_id = str(uuid4())
-        name = name or f"{source_type}_{datetime.utcnow():%Y%m%d_%H%M%S}"
+        name = name or f"{source_type}_{datetime.now(timezone.utc):%Y%m%d_%H%M%S}"
 
         session = MotionSession(
             id=session_id,
@@ -79,7 +79,7 @@ class DatasetBuilderHOI(DatasetBuilder):
             frame_count=len(frames),
             duration_s=round(len(frames) / fps, 2),
             action_label="unlabeled",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         self.db.add(session)
 

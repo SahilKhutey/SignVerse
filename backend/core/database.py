@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Dict
 from contextlib import contextmanager
 from backend.config import settings
@@ -48,7 +48,7 @@ class Database:
                     frame_count,
                     duration_sec,
                     video_path,
-                    datetime.utcnow().isoformat(),
+                    datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
                     "ready",
                     "unlabeled",
                     0.0,

@@ -43,10 +43,15 @@ class CompletePerceptionResult:
 
     # Metric depth extensions
     pose_33_metric: Optional[List[List[float]]] = None
+    left_hand_21_metric: Optional[List[List[float]]] = None
+    right_hand_21_metric: Optional[List[List[float]]] = None
     objects_metric: Optional[List[Dict]] = None
     depth_map: Optional[np.ndarray] = None
     scale_factor: Optional[float] = None
     person_height_m: Optional[float] = None
+    shoulder_width_m: Optional[float] = None
+    left_arm_length_m: Optional[float] = None
+    right_arm_length_m: Optional[float] = None
 
 class CompleteTracker:
     """
@@ -119,8 +124,13 @@ class CompleteTracker:
             
             # Metric depth extensions
             pose_33_metric=metric_res.pose_33_metric if metric_res else None,
+            left_hand_21_metric=metric_res.left_hand_21_metric if metric_res else None,
+            right_hand_21_metric=metric_res.right_hand_21_metric if metric_res else None,
             objects_metric=metric_res.objects_metric if metric_res else None,
             depth_map=metric_res.depth_map if metric_res else None,
             scale_factor=metric_res.scale_factor if metric_res else None,
-            person_height_m=metric_res.person_height_m if metric_res else None
+            person_height_m=metric_res.person_height_m if metric_res else None,
+            shoulder_width_m=metric_res.shoulder_width_m if metric_res else None,
+            left_arm_length_m=metric_res.left_arm_length_m if metric_res else None,
+            right_arm_length_m=metric_res.right_arm_length_m if metric_res else None
         )

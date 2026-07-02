@@ -11,6 +11,7 @@ from datetime import datetime
 import gc
 import psutil
 import plotly.graph_objects as go
+import math
 
 # Append current directory to path
 sys.path.append(str(Path(__file__).parent.resolve()))
@@ -501,6 +502,38 @@ with st.sidebar:
         ]
     )
     
+    st.divider()
+    st.markdown("### 🚀 Launch Platform Services")
+    
+    # Check if backend is online
+    backend_online = False
+    try:
+        import urllib.request
+        with urllib.request.urlopen("http://localhost:8000/", timeout=1.0) as response:
+            if response.status == 200:
+                backend_online = True
+    except:
+        pass
+
+    if backend_online:
+        st.success("🟢 API Services: Active")
+    else:
+        st.error("🔴 API Services: Offline")
+        if st.button("🚀 Launch Complete Stack"):
+            import subprocess
+            import sys
+            try:
+                # Use subprocess to launch start.bat in a separate new console window
+                if sys.platform == "win32":
+                    subprocess.Popen(["cmd.exe", "/c", "start.bat"], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                else:
+                    subprocess.Popen(["sh", "run.sh"])
+                st.info("⚡ Services triggered! Reloading...")
+                time.sleep(2)
+                st.rerun()
+            except Exception as e:
+                st.error(f"Failed to launch: {e}")
+
     st.divider()
     st.info("🎓 **SignVerse Robotics Studio**\n- 11-DoF Humanoid Retargeting\n- Action Segmentation & HOI\n- SQLite Persistence Layer")
 
@@ -1358,6 +1391,138 @@ elif current_page == "📊 Analytics Dashboard":
             
             st.bar_chart(dur_df)
 
+            # 4. HOI Grouped Bar Chart
+            st.divider()
+            st.markdown("### 🤖 Hand-Object Interaction (HOI) Distribution")
+            
+            session_ids = [s["id"] for s in filtered_sessions]
+            placeholders = ",".join("?" for _ in session_ids)
+            
+            with db._conn() as conn:
+                hoi_rows = conn.execute(
+                    f"SELECT object_class, interaction_type, COUNT(*) as count "
+                    f"FROM hand_object_interactions "
+                    f"WHERE session_id IN ({placeholders}) "
+                    f"GROUP BY object_class, interaction_type",
+                    session_ids
+                ).fetchall()
+                
+            if not hoi_rows:
+                st.info("No Hand-Object interactions logged for the filtered sessions.")
+            else:
+                hoi_data = [dict(r) for r in hoi_rows]
+                hoi_df = pd.DataFrame(hoi_data)
+                
+                fig_hoi = go.Figure()
+                types = list(set(r["interaction_type"] for r in hoi_data))
+                colors_dict = {"HOLDING": "#00D9FF", "GRASPING": "#FF0055", "NEAR": "#00FF66", "TOUCHING": "#FFB300"}
+                
+                for t in types:
+                    subset = hoi_df[hoi_df["interaction_type"] == t]
+                    fig_hoi.add_trace(go.Bar(
+                        name=t.upper(),
+                        x=subset["object_class"],
+                        y=subset["count"],
+                        marker_color=colors_dict.get(t, "#990033")
+                    ))
+                fig_hoi.update_layout(
+                    barmode='group',
+                    template='plotly_dark',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(t=20, b=20, l=20, r=20)
+                )
+                st.plotly_chart(fig_hoi, use_container_width=True)
+
+            # 5. Object Trajectory Speeds
+            st.markdown("### 💫 Object Average Speeds")
+            with db._conn() as conn:
+                traj_rows = conn.execute(
+                    f"SELECT class_name, AVG(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z) as speed_sq "
+                    f"FROM object_trajectories "
+                    f"WHERE session_id IN ({placeholders}) "
+                    f"GROUP BY class_name",
+                    session_ids
+                ).fetchall()
+                
+            if not traj_rows:
+                st.info("No object trajectory velocities logged for the filtered sessions.")
+            else:
+                speeds = []
+                classes = []
+                for r in traj_rows:
+                    classes.append(r["class_name"].upper())
+                    speeds.append(math.sqrt(r["speed_sq"]) if r["speed_sq"] > 0 else 0.0)
+                    
+                fig_speed = go.Figure(data=[go.Bar(
+                    x=classes,
+                    y=speeds,
+                    marker_color='#00FF66'
+                )])
+                fig_speed.update_layout(
+                    yaxis_title="Average Velocity Magnitude (m/s)",
+                    template='plotly_dark',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(t=20, b=20, l=20, r=20)
+                )
+                st.plotly_chart(fig_speed, use_container_width=True)
+
+            # 6. Biomechanical Joint Velocity Inspector
+            st.divider()
+            st.markdown("### 🔬 Session-Level Biomechanical Trajectory Inspector")
+            session_options = {s["name"]: s["id"] for s in filtered_sessions}
+            selected_session_name = st.selectbox("Select Session to Inspect:", list(session_options.keys()))
+            
+            if selected_session_name:
+                sel_session_id = session_options[selected_session_name]
+                
+                with db._conn() as conn:
+                    frame_rows = conn.execute(
+                        "SELECT frame_idx, kinematics_json FROM motion_frames WHERE session_id = ? ORDER BY frame_idx",
+                        (sel_session_id,)
+                    ).fetchall()
+                    
+                if not frame_rows:
+                    st.info("No frames found for the selected session.")
+                else:
+                    times = []
+                    right_arm_speeds = []
+                    left_arm_speeds = []
+                    
+                    prev_right = None
+                    prev_left = None
+                    
+                    for row in frame_rows:
+                        idx = row["frame_idx"]
+                        try:
+                            kin = json.loads(row["kinematics_json"])
+                            euler = kin.get("euler_deg", {})
+                            r_joint = euler.get("RightArm", euler.get("RightForeArm", [0, 0, 0]))
+                            l_joint = euler.get("LeftArm", euler.get("LeftForeArm", [0, 0, 0]))
+                            
+                            if prev_right is not None:
+                                dr = math.sqrt(sum((r_joint[i] - prev_right[i])**2 for i in range(3)))
+                                dl = math.sqrt(sum((l_joint[i] - prev_left[i])**2 for i in range(3)))
+                                
+                                right_arm_speeds.append(dr)
+                                left_arm_speeds.append(dl)
+                                times.append(idx)
+                                
+                            prev_right = r_joint
+                            prev_left = l_joint
+                        except Exception:
+                            pass
+                    
+                    if times:
+                        st.markdown(f"#### 🏃 Joint Rotation Speed over Time ({selected_session_name})")
+                        chart_df = pd.DataFrame({
+                            "Right Arm Speed (deg/frame)": right_arm_speeds,
+                            "Left Arm Speed (deg/frame)": left_arm_speeds
+                        }, index=times)
+                        st.line_chart(chart_df)
+                    else:
+                        st.info("Euler rotation angles not found in kinematics data.")
+
+
 # ----------------- Page 5: System Diagnostics -----------------
 
 elif current_page == "⚙️ System Diagnostics":
@@ -1463,3 +1628,49 @@ elif current_page == "⚙️ System Diagnostics":
     telemetry_df = pd.DataFrame(st.session_state["telemetry_history"])
     st.line_chart(telemetry_df.set_index("timestamp"))
     st.caption("💡 *Updates in real-time as you navigate pages, execute perception tracking, or trigger garbage collection.*")
+
+    # API & WebSocket Telemetry
+    st.divider()
+    st.markdown("### 📡 API & WebSocket Operational Telemetry")
+    
+    from backend.services.profiling.telemetry_manager import telemetry_manager
+    api_metrics = telemetry_manager.get_api_metrics()
+    ws_metrics = telemetry_manager.get_ws_metrics()
+    
+    col_ws, col_api = st.columns([1, 2])
+    
+    with col_ws:
+        st.markdown("#### 📺 Live WebSocket Stream Stats")
+        st.json(ws_metrics)
+        
+    with col_api:
+        st.markdown("#### ⚡ API Response Performance")
+        if not api_metrics:
+            st.info("No API routes have been measured yet in this session.")
+        else:
+            api_df = pd.DataFrame(api_metrics)
+            # Reorder columns for optimal readability
+            columns_order = ["method", "path", "count", "mean_latency_ms", "max_latency_ms", "error_rate_percent"]
+            available_cols = [c for c in columns_order if c in api_df.columns]
+            st.dataframe(api_df[available_cols], use_container_width=True)
+            
+    # Resilience & Circuit Breakers
+    st.divider()
+    st.markdown("### 🛡️ System Resilience & Fault Tolerance (Circuit Breakers)")
+    from backend.resilience.circuit_breaker import BREAKER_REGISTRY
+    
+    if not BREAKER_REGISTRY:
+        st.info("No circuit breakers are registered in the active session.")
+    else:
+        breaker_data = []
+        for name, breaker in BREAKER_REGISTRY.items():
+            state_data = breaker.get_state()
+            breaker_data.append({
+                "Breaker Name": state_data["name"],
+                "Current State": state_data["state"],
+                "Failure Count": state_data["failure_count"],
+                "Success Count": state_data["success_count"],
+                "Last State Change": datetime.fromtimestamp(breaker.last_state_change).strftime("%Y-%m-%d %H:%M:%S") if breaker.last_state_change else "N/A"
+            })
+        st.dataframe(pd.DataFrame(breaker_data), use_container_width=True)
+

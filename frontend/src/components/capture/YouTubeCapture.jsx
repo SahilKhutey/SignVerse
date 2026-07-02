@@ -13,16 +13,14 @@ export default function YouTubeCapture() {
   const handleIngest = async () => {
     if (!url) return
     setLoading(true)
-    addToast('Downloading and processing YouTube video...', 'info')
+    addToast('Submitting YouTube link for ingestion...', 'info')
     try {
       const { data } = await api.post('/api/capture/youtube', 
         new URLSearchParams({ url }),
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
       )
-      addToast('YouTube download & ingestion completed successfully!', 'success')
-      if (data) {
-        addSession(data)
-      }
+      addToast(`YouTube link submitted! Job ID: ${data.job_id}`, 'success')
+      setUrl('')
     } catch (e) {
       const msg = e.response?.data?.detail || e.response?.data?.error || e.message
       addToast(`YouTube capture failed: ${msg}`, 'error')
@@ -47,7 +45,7 @@ export default function YouTubeCapture() {
         disabled={!url || loading}
         style={{ width: '100%' }}
       >
-        {loading ? '⏳ Downloading YouTube stream...' : '📥 Ingest YouTube Link'}
+        {loading ? '⏳ Submitting link...' : '📥 Submit YouTube link'}
       </Button>
     </div>
   )

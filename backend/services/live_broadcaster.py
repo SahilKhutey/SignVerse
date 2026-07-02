@@ -244,6 +244,19 @@ class LiveBroadcaster:
                 # Quality
                 "pose_confidence": result.pose_confidence,
                 "processing_time_ms": result.processing_time_ms,
+
+                # Metric depth extensions (synced with frontend requirements)
+                "metric_frame": {
+                    "pose_33_metric": result.pose_33_metric,
+                    "left_hand_21_metric": result.left_hand_21_metric,
+                    "right_hand_21_metric": result.right_hand_21_metric,
+                    "objects_metric": result.objects_metric,
+                    "scale_factor": result.scale_factor,
+                    "person_height_m": result.person_height_m,
+                    "shoulder_width_m": result.shoulder_width_m,
+                    "left_arm_length_m": result.left_arm_length_m,
+                    "right_arm_length_m": result.right_arm_length_m,
+                } if result.pose_33_metric is not None else None,
             },
             "meta": {
                 "server_fps": round(self.fps_counter["fps"], 1),

@@ -7,6 +7,7 @@ import gc
 import time
 
 from backend.services.profiling.memory_tracker import memory_tracker
+from backend.services.profiling.telemetry_manager import telemetry_manager
 
 router = APIRouter(prefix="/api/profiling", tags=["profiling"])
 
@@ -124,3 +125,13 @@ def _generate_recommendations(summary: dict, alerts: list, components: list) -> 
         })
     
     return recs
+
+
+@router.get("/metrics")
+async def get_telemetry_metrics():
+    """Get global telemetry metrics (APIs and WebSockets)."""
+    return {
+        "api": telemetry_manager.get_api_metrics(),
+        "websockets": telemetry_manager.get_ws_metrics()
+    }
+

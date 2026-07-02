@@ -52,7 +52,7 @@ class TestFullWorkflowE2E:
         # Submit upload request
         # Mock the pipeline processing to avoid OpenCV dependencies loading heavy files
         from backend.core.schemas import SessionMetadata, PoseFrame, Landmark
-        from datetime import datetime
+        from datetime import datetime, timezone
         dummy_session_id = "e2e_test_sess"
         mock_result = {
             "session_id": dummy_session_id,
@@ -63,7 +63,7 @@ class TestFullWorkflowE2E:
                 fps=30.0,
                 frame_count=10,
                 duration_sec=0.33,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
                 status="ready"
             ),
             "frames": [
@@ -87,15 +87,24 @@ class TestFullWorkflowE2E:
         ]
         cap_instance.get.return_value = 30.0
 
+        from backend.ingestion.orchestrator import IngestionJob, JobStatus
+        mock_job = IngestionJob(
+            job_id="e2e_test_job",
+            source_type="upload",
+            source_path="demo.mp4",
+            source_url=None,
+            status=JobStatus.QUEUED
+        )
+
         with patch("backend.routers.capture.validate_video", return_value=(True, "")):
             with patch("cv2.VideoCapture", return_value=cap_instance):
-                with patch("backend.services.dataset_builder.DatasetBuilder.build_session", return_value=dummy_session_id):
+                with patch("backend.routers.capture.orchestrator.submit_job", return_value=mock_job):
                     # Ingestion call
                     upload_resp = client.post("/api/capture/upload", files=file_payload, headers=headers)
                     assert upload_resp.status_code == 200
                     upload_data = upload_resp.json()
-                    assert upload_data["status"] == "ready"
-                    assert upload_data["session_id"] == dummy_session_id
+                    assert upload_data["status"] == "queued"
+                    assert upload_data["job_id"] == "e2e_test_job"
 
         # 3. VERIFY DATABASE PERSISTENCE
         # The router saves the session and frames to database. Let's populate db_session directly with E2E sample.
@@ -109,7 +118,7 @@ class TestFullWorkflowE2E:
             duration_s=0.33,
             action_label="unlabeled",
             avg_confidence=0.9,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None)
         )
         db_session.add(session)
         for i in range(10):

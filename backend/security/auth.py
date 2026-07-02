@@ -9,7 +9,7 @@ import time
 import jwt
 from typing import Optional, Dict, List
 from functools import wraps
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 from fastapi import HTTPException, Request, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -51,8 +51,8 @@ def create_jwt_token(user_id: str, role: str = "user", expiry_hours: int = JWT_E
     payload = {
         "sub": user_id,
         "role": role,
-        "iat": datetime.utcnow(),
-        "exp": datetime.utcnow() + timedelta(hours=expiry_hours),
+        "iat": datetime.now(timezone.utc).replace(tzinfo=None),
+        "exp": datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=expiry_hours),
         "jti": secrets.token_urlsafe(16),  # Unique token ID (for revocation)
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)

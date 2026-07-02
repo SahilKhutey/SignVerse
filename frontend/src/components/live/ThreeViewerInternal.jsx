@@ -71,6 +71,117 @@ function LiveSkeleton({ frame }) {
   return <group ref={groupRef} />
 }
 
+const HOI_COLORS = {
+  HOLDING:     '#00e676',
+  GRASPING:    '#ff4400',
+  LIFTING:     '#00e5ff',
+  MOVING:      '#7c4dff',
+  PLACING:     '#ff6d00',
+  TOUCHING:    '#ff8800',
+  NEAR:        '#ffcc00',
+  RELEASING:   '#e040fb',
+  POINTING:    '#40c4ff',
+  DEFAULT:     '#5a6188',
+}
+
+function getHOIColor(interactionType) {
+  return HOI_COLORS[interactionType] || HOI_COLORS.DEFAULT
+}
+
+function getClassColor(className) {
+  const colors = {
+    cup: '#ff0055',
+    bottle: '#00d9ff',
+    cellphone: '#7c3aed',
+    book: '#10b981',
+    chair: '#f59e0b',
+    table: '#3b82f6',
+    person: '#e4e7f1',
+  }
+  return colors[className?.toLowerCase()] || '#88aaff'
+}
+
+function LiveObjects({ frame }) {
+  const objects = frame?.metric_frame?.objects_metric || []
+  const interactions = frame?.interaction_graph?.interactions || []
+
+  // Create interaction map
+  const interactionMap = {}
+  for (const ia of interactions) {
+    const tid = ia.object_track_id
+    if (tid != null) interactionMap[tid] = ia.interaction_type
+  }
+
+  return (
+    <group>
+      {objects.map((obj) => {
+        const tid = obj.track_id
+        const pos = obj.position_m // [x_m, y_m, depth_z]
+        const size = obj.size_m || [0.1, 0.1, 0.1]
+        
+        // Scale and coordinates mapping to match LiveSkeleton
+        const scale = 1.5
+        const posX = pos[0] * scale
+        const posY = pos[1] * scale
+        const posZ = -pos[2] * scale
+        
+        const itype = interactionMap[tid]
+        const glowColor = getHOIColor(itype)
+        const baseColor = getClassColor(obj.class)
+
+        return (
+          <group key={tid} position={[posX, posY, posZ]}>
+            {/* Object Box Mesh */}
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={size} />
+              <meshPhongMaterial
+                color={baseColor}
+                emissive={new THREE.Color(glowColor)}
+                emissiveIntensity={itype ? 0.8 : 0.2}
+                transparent
+                opacity={0.8}
+                shininess={60}
+              />
+            </mesh>
+
+            {/* Glowing outer wireframe if interacted */}
+            {itype && (
+              <mesh>
+                <boxGeometry args={size.map(s => s * 1.08)} />
+                <meshBasicMaterial
+                  color={glowColor}
+                  wireframe
+                  transparent
+                  opacity={0.6}
+                />
+              </mesh>
+            )}
+
+            {/* Object Label Sprite */}
+            <Html distanceFactor={3} position={[0, size[1] / 2 + 0.12, 0]} center>
+              <div style={{
+                background: 'rgba(7, 11, 20, 0.92)',
+                border: `1px solid ${itype ? glowColor : '#00d9ff'}`,
+                borderRadius: 4,
+                padding: '3px 8px',
+                color: '#fff',
+                fontSize: 10,
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                boxShadow: itype ? `0 0 10px ${glowColor}` : 'none',
+              }}>
+                {obj.class} #{tid} {itype ? `· ${itype}` : ''}
+              </div>
+            </Html>
+          </group>
+        )
+      })}
+    </group>
+  )
+}
+
 function IntentLabel({ frame }) {
   if (!frame) return null
   return (
@@ -107,7 +218,10 @@ export default function ThreeViewerInternal({ frame }) {
       <Grid args={[3, 3]} cellColor="#2a3158" sectionColor="#1c2348" position={[0, -0.8, 0]} />
       <OrbitControls enableDamping dampingFactor={0.05} target={[0, 0, 0]} />
       <LiveSkeleton frame={frame} />
+      <LiveObjects frame={frame} />
       <IntentLabel frame={frame} />
     </Canvas>
   )
 }
+
+

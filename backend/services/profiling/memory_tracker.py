@@ -166,7 +166,7 @@ class MemoryTracker:
         
         # Start tracemalloc only when background monitoring starts
         if not tm.is_tracing():
-            tm.start(25)
+            tm.start(1)
             
         self._thread = threading.Thread(
             target=self._monitor_loop,

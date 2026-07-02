@@ -3,7 +3,7 @@ Integration tests for the database dataset builder/persistence layer.
 """
 import json
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from backend.models.database import MotionSession, MotionFrame
 
 
@@ -23,7 +23,7 @@ class TestDatasetBuilderIntegration:
             duration_s=0.0,
             action_label="gesture",
             avg_confidence=0.9,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None)
         )
         db_session.add(session)
         db_session.commit()
@@ -63,7 +63,7 @@ class TestDatasetBuilderIntegration:
             duration_s=0.066,
             action_label="sign",
             avg_confidence=0.95,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None)
         )
         db_session.add(session)
         db_session.commit()

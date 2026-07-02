@@ -58,21 +58,24 @@ function ProfilingPanel() {
   const [timeline, setTimeline] = useState([])
   const [components, setComponents] = useState([])
   const [alerts, setAlerts] = useState([])
+  const [metrics, setMetrics] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
   
   const fetchData = async () => {
     setRefreshing(true)
     try {
-      const [sumRes, tlRes, compRes, alertRes] = await Promise.all([
+      const [sumRes, tlRes, compRes, alertRes, metricsRes] = await Promise.all([
         api.get('/api/profiling/memory/summary'),
         api.get('/api/profiling/memory/timeline?last_n=60'),
         api.get('/api/profiling/memory/components'),
         api.get('/api/profiling/memory/alerts?since_seconds=3600'),
+        api.get('/api/profiling/metrics'),
       ])
       setSummary(sumRes.data)
       setTimeline(tlRes.data)
       setComponents(compRes.data)
       setAlerts(alertRes.data)
+      setMetrics(metricsRes.data)
     } catch (e) {
       console.error('Failed to fetch profiling data:', e)
     } finally {
@@ -221,6 +224,70 @@ function ProfilingPanel() {
                 <div style={{ marginTop: 4 }}>{a.message}</div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      {/* Telemetry operations metrics */}
+      {metrics && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20, marginTop: 20 }}>
+          {/* WebSocket Metrics */}
+          <div style={{ background: '#0a0e27', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: 13, margin: '0 0 12px 0', color: '#00d9ff', fontFamily: 'monospace' }}>📡 WebSocket Stream Telemetry</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12, fontFamily: 'monospace', color: '#e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Active Connections:</span>
+                <span style={{ color: '#10b981', fontWeight: 'bold' }}>{metrics.websockets?.active_connections || 0}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Total Frames Received:</span>
+                <span>{metrics.websockets?.total_frames_received || 0}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Total Frames Processed:</span>
+                <span>{metrics.websockets?.total_frames_processed || 0}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Mean Processing Latency:</span>
+                <span style={{ color: '#00d9ff' }}>{metrics.websockets?.mean_frame_latency_ms?.toFixed(1) || 0.0} ms</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Peak Processing Latency:</span>
+                <span style={{ color: '#f59e0b' }}>{metrics.websockets?.peak_frame_latency_ms?.toFixed(1) || 0.0} ms</span>
+              </div>
+            </div>
+          </div>
+
+          {/* API Metrics Table */}
+          <div style={{ background: '#0a0e27', padding: 16, borderRadius: 8, border: '1px solid var(--border)', overflowX: 'auto' }}>
+            <h3 style={{ fontSize: 13, margin: '0 0 12px 0', color: '#00d9ff', fontFamily: 'monospace' }}>⚡ API Latency & Hit Stats</h3>
+            {metrics.api?.length === 0 ? (
+              <div style={{ color: '#9ca3c4', fontSize: 12, fontFamily: 'monospace' }}>No API calls measured yet. Navigate the studio to populate metrics.</div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, fontFamily: 'monospace', textAlign: 'left', color: '#e2e8f0' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #1e293b', color: '#9ca3c4' }}>
+                    <th style={{ paddingBottom: 6 }}>Method</th>
+                    <th style={{ paddingBottom: 6 }}>Endpoint</th>
+                    <th style={{ paddingBottom: 6 }}>Hits</th>
+                    <th style={{ paddingBottom: 6 }}>Avg Latency</th>
+                    <th style={{ paddingBottom: 6 }}>Max Latency</th>
+                    <th style={{ paddingBottom: 6 }}>Err %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {metrics.api?.map((r, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #0f172a' }}>
+                      <td style={{ padding: '6px 0', color: r.method === 'GET' ? '#60a5fa' : '#34d399', fontWeight: 'bold' }}>{r.method}</td>
+                      <td style={{ padding: '6px 0', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.path}>{r.path}</td>
+                      <td style={{ padding: '6px 0' }}>{r.count}</td>
+                      <td style={{ padding: '6px 0', color: r.mean_latency_ms > 500 ? '#ef4444' : '#e2e8f0' }}>{r.mean_latency_ms} ms</td>
+                      <td style={{ padding: '6px 0' }}>{r.max_latency_ms} ms</td>
+                      <td style={{ padding: '6px 0', color: r.error_rate_percent > 0 ? '#ef4444' : '#10b981' }}>{r.error_rate_percent}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}

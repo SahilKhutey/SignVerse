@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import uuid
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, AsyncGenerator
 import json
 
@@ -74,7 +74,7 @@ class FrameProcessor:
             fps=fps,
             frame_count=len(self.frames),
             duration_sec=len(self.frames) / fps,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             status="ready",
         )
         return self.metadata
@@ -125,7 +125,7 @@ class FrameProcessor:
             fps=fps,
             frame_count=len(self.frames),
             duration_sec=elapsed,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             status="ready",
         )
 

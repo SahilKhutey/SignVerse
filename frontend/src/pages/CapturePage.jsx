@@ -3,6 +3,7 @@ import WebcamCapture from '../components/capture/WebcamCapture'
 import VideoUpload from '../components/capture/VideoUpload'
 import YouTubeCapture from '../components/capture/YouTubeCapture'
 import CapturePanel from '../components/capture/CapturePanel'
+import IngestionQueue from '../components/capture/IngestionQueue'
 
 export default function CapturePage() {
   const [activeTab, setActiveTab] = useState('upload')
@@ -26,6 +27,7 @@ export default function CapturePage() {
         {activeTab === 'youtube' && <YouTubeCapture />}
       </div>
       
+      <IngestionQueue />
       <CapturePanel />
     </div>
   )

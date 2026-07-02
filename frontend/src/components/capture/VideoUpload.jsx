@@ -13,17 +13,15 @@ export default function VideoUpload() {
   const handleUpload = async () => {
     if (!file) return
     setLoading(true)
-    addToast('Uploading video and extracting 3D motion path...', 'info')
+    addToast('Uploading video file to server...', 'info')
     try {
       const fd = new FormData()
       fd.append('file', file)
       const { data } = await api.post('/api/capture/upload', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      addToast('Motion extraction completed successfully!', 'success')
-      if (data) {
-        addSession(data)
-      }
+      addToast(`Ingestion task submitted! Job ID: ${data.job_id}`, 'success')
+      setFile(null)
     } catch (e) {
       const msg = e.response?.data?.detail || e.response?.data?.error || e.message
       addToast(`Upload failed: ${msg}`, 'error')
@@ -47,7 +45,7 @@ export default function VideoUpload() {
         disabled={!file || loading}
         style={{ width: '100%' }}
       >
-        {loading ? '⏳ Processing video frames...' : '🚀 Process & Ingest Video'}
+        {loading ? '⏳ Uploading video file...' : '🚀 Submit to Ingestion Queue'}
       </Button>
     </div>
   )

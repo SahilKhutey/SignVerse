@@ -117,7 +117,7 @@ def sample_video_frames():
 def sample_session(db_session):
     """Create a test session in the database."""
     import uuid
-    from datetime import datetime
+    from datetime import datetime, timezone
     
     session = MotionSession(
         id=str(uuid.uuid4())[:12],
@@ -128,7 +128,7 @@ def sample_session(db_session):
         duration_s=1.0,
         action_label="unlabeled",
         avg_confidence=0.85,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db_session.add(session)
     db_session.commit()

@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from typing import List, Dict
-from datetime import datetime
+from datetime import datetime, timezone
 from .skeleton_graph import SkeletonGraph, MP
 from .kinematics import Kinematics
 
@@ -199,7 +199,7 @@ class RobotRetargeter:
                 "duration_sec": len(joint_angles) / fps,
                 "format_version": "1.0",
                 "compatible_with": ["MuJoCo", "Isaac Sim", "ROS2"],
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             },
             "trajectory": {
                 "timestamps_sec": timestamps,

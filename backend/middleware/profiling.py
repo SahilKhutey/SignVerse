@@ -58,6 +58,13 @@ class ProfilingMiddleware(BaseHTTPMiddleware):
         
         # Calculate deltas
         duration_ms = (time.perf_counter() - start_time) * 1000
+        
+        # Record API route latency
+        try:
+            from backend.services.profiling.telemetry_manager import telemetry_manager
+            telemetry_manager.record_route_latency(request.url.path, request.method, duration_ms / 1000, response.status_code)
+        except Exception:
+            pass
         end_mem = self.process.memory_info().rss
         end_cpu = self.process.cpu_times()
         

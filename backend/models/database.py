@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 from sqlalchemy import (
     create_engine, Column, String, Integer, Float, Text,
@@ -24,7 +24,7 @@ class MotionSession(Base):
     thumbnail_path = Column(String(512), nullable=True)
     kinematics_path= Column(String(512), nullable=True)
     avg_confidence = Column(Float, nullable=False, default=0.0)
-    created_at     = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at     = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
     # Compatibility columns
     notes          = Column(Text, nullable=True, default="")
